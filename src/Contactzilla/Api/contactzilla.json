@@ -1,0 +1,13 @@
+{
+    "name": "Contactzilla",
+    "apiVersion": "0.0.1",
+    "baseUrl": "https://api.contactzilla.com",
+    "description": "Contactzilla is an API that allows you to access all your contacts",
+    "operations": {
+        "GetApiDetails": {
+            "httpMethod": "GET",
+            "uri": "/",
+            "summary": "Gets details of the API"
+        }
+    }
+}

@@ -14,8 +14,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 		// Get the client from the service builder by name
 		$client = $builder->get('Contactzilla');
 
-		$response = $client->get('/')->send();
-
-		$this->assertEquals('0.0.1', $response->json()['api_version']);
+		$this->assertEquals('0.0.1', $client->GetApiDetails()['api_version']);
     }
 }

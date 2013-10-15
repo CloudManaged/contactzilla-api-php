@@ -35,6 +35,9 @@ class Client extends GuzzleClient
         // Ensure that the OauthPlugin is attached to the client
         $client->addSubscriber(new OauthPlugin($config->toArray()));
 
+        // Set the service description
+        $client->setDescription(ServiceDescription::factory(__DIR__.'/contactzilla.json'));
+
         return $client;
     }
 }
