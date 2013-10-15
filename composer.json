@@ -1,0 +1,20 @@
+{
+	"name": "cloudmanaged/contactzilla-api-client",
+    "description": "Contactzilla Api Client",
+    "keywords": [ "data", "api", "client" ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tom Holder",
+            "email": "tom@contactzilla.com"
+        }
+    ],
+    "require": {
+    	"php": ">=5.4",
+        "guzzle/guzzle": "~3.7",
+        "phpunit/phpunit": "3.7.*"
+    },
+    "autoload": {
+        "psr-0": { "Contactzilla": "src" }
+    }
+}

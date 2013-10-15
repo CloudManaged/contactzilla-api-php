@@ -1,0 +1,13 @@
+{
+    "services": {
+        "Contactzilla": {
+            "class": "\\Contactzilla\\Api\\Client",
+            "params": {
+                "consumer_key": "YOUR CONSUMER KEY",
+                "consumer_secret": "YOUR CONSUMER SECRET",
+                "token": "YOUR OAUTH TOKEN",
+                "token_secret": "YOUR OAUTH SECRET"
+            }
+        }
+    }
+}
