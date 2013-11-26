@@ -1,4 +1,4 @@
-contactzilla-api-client
+Contactzilla PHP API Client
 =======================
 
-Api client library for communicating with Contactzilla API.
+A PHP 5.3+ compatible API client for the Contactzilla seamless contact management platform.
