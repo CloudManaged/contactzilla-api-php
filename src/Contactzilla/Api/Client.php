@@ -8,7 +8,7 @@ use Guzzle\Service\Client as GuzzleClient;
 use Guzzle\Service\Description\ServiceDescription;
 
 /**
- * A simple Twitter API client
+ * A simple Contactzilla API client
  */
 class Client extends GuzzleClient
 {
@@ -29,7 +29,7 @@ class Client extends GuzzleClient
         // Merge in default settings and validate the config
         $config = Collection::fromConfig($config, $default, $required);
 
-        // Create a new Twitter client
+        // Create a new Contactzilla client
         $client = new self($config->get('base_url'), $config);
 
         // Ensure that the OauthPlugin is attached to the client
