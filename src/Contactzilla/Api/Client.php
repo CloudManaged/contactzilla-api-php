@@ -2,42 +2,94 @@
 
 namespace Contactzilla\Api;
 
-use Guzzle\Common\Collection;
-use Guzzle\Plugin\Oauth\OauthPlugin;
-use Guzzle\Service\Client as GuzzleClient;
-use Guzzle\Service\Description\ServiceDescription;
+use Guzzle\Http\Client as GuzzleClient;
+use Guzzle\Http\Exception\ClientErrorResponseException;
 
-/**
- * A simple Contactzilla API client
- */
-class Client extends GuzzleClient
+class Client
 {
-    public static function factory($config = array())
+    public function __construct(
+        $access_token,
+        $appId = false,
+        $appSecret = false,
+        $addressBook = false,
+        $appInstallId = false,
+        $apiHost = false
+    ) {
+        $this->appId = $appId ? $appId : APP_ID;
+        $this->appSecret = $appSecret ? $appSecret : APP_SECRET;
+        $this->apiHost = $apiHost ? $apiHost : API_HOST;
+        $this->addressBook = $addressBook ? $addressBook : $_GET['appContextAddressBook'];
+        $this->appInstallId = $appInstallId ? $appInstallId : $_GET['appContextInstallId'];
+        $this->access_token = $access_token;
+
+        $this->client = new GuzzleClient('https://' . $this->apiHost);
+        $this->client->setDefaultOption('query', ['access_token' => $access_token]);
+
+        if (APPLICATION_ENV == 'dev') {
+            $this->client->setDefaultOption('verify', false);
+        }
+    }
+
+    public function post($endpoint, $params = [])
     {
-        // Provide a hash of default client configuration options
-        $default = array('base_url' => 'https://api.localtesting.contactzilla.com');
+        try {
+            // This is a bit of a fudge to prevent having to amend all calls to /contacts
+            if ($endpoint == '/contacts') {
+                 $endpoint = '/address_books/' . $this->addressBook . '/contacts';
+            }
 
-        // The following values are required when creating the client
-        $required = array(
-            'base_url',
-            'consumer_key',
-            'consumer_secret',
-            'token',
-            'token_secret'
-        );
+            if ($endpoint == '/data/user') {
+                $endpoint = $this->getDataUrl();
+            }
 
-        // Merge in default settings and validate the config
-        $config = Collection::fromConfig($config, $default, $required);
+            $response = $this->client->post($endpoint, [], $params)->send();
 
-        // Create a new Contactzilla client
-        $client = new self($config->get('base_url'), $config);
+            return $response->json();
+        } catch(ClientErrorResponseException $e) {
+            $message = APPLICATION_ENV=='dev' ? 'Api responded with: ' . $e->getResponse()->getBody() :
+                'An unexpected error occurred communicating with Contactzilla. If the problem persists, please contact support.';
 
-        // Ensure that the OauthPlugin is attached to the client
-        $client->addSubscriber(new OauthPlugin($config->toArray()));
+            throw new ClientErrorResponseException($message);
+        }
+    }
 
-        // Set the service description
-        $client->setDescription(ServiceDescription::factory(__DIR__.'/contactzilla.json'));
+    public function get($endpoint, $params = [])
+    {
+        try {
+            // This is a bit of a fudge to prevent having to amend all calls to /data/user
+            if ($endpoint == '/data/user') {
+                $endpoint = $this->getDataUrl();
+            }
 
-        return $client;
+            $response = $this->client->get($endpoint, [], [
+                'query' => $params
+            ])->send();
+
+            return $response->json();
+        } catch(ClientErrorResponseException $e) {
+            $message = APPLICATION_ENV=='dev' ? 'Api responded with: ' . $e->getResponse()->getBody() :
+                'An unexpected error occurred communicating with Contactzilla. If the problem persists, please contact support.';
+            throw new ClientErrorResponseException($message);
+        }
+    }
+
+    public function call($endpoint, $params = [], $method) {
+        return $this->$method($endpoint, $params);
+    }
+
+    /**
+     * Saves user data against the application.
+     */
+    public function saveDataKeyValue($key, $value)
+    {
+        $this->post($this->getDataUrl(), [
+            'body' => json_encode([
+                ['key' => $key, 'value' => $value]
+            ])
+        ]);
+    }
+
+    private function getDataUrl() {
+        return '/address_books/' . $this->addressBook . '/app_install/' . $this->appInstallId . '/data/user';
     }
 }
