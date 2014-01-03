@@ -36,6 +36,19 @@ class Client
         $this->client->getEventDispatcher()->addListener('request.before_send', array($this, 'beforeRequestFixLegacyEndpoints'));
     }
 
+    public function get($endpoint, $params = array())
+    {
+        try {
+            $response = $this->client->get($endpoint, array(), array('query' => $params))->send();
+        } catch(Guzzle\Http\Exception\ClientErrorResponseException $e) {
+            $message = $this->debug ? 'API responded with: ' . $e->getResponse()->getBody() : self::ERROR_MESSAGE;
+
+            throw new Guzzle\Http\Exception\ClientErrorResponseException($message);
+        }
+
+        return $response->json();
+    }
+
     public function post($endpoint, $params = array())
     {
         try {
@@ -49,25 +62,8 @@ class Client
         return $response->json();
     }
 
-    public function get($endpoint, $params = array())
+    public function call($endpoint, $params = array(), $method)
     {
-        try {
-            $response = $this->client
-                ->get($endpoint, array(), array(
-                    'query' => $params
-                ))
-                ->send()
-            ;
-
-            return $response->json();
-        } catch(Guzzle\Http\Exception\ClientErrorResponseException $e) {
-            $message = $this->debug ? 'API responded with: ' . $e->getResponse()->getBody() : self::ERROR_MESSAGE;
-
-            throw new Guzzle\Http\Exception\ClientErrorResponseException($message);
-        }
-    }
-
-    public function call($endpoint, $params = array(), $method) {
         return $this->$method($endpoint, $params);
     }
 
