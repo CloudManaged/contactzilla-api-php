@@ -23,14 +23,14 @@ class Client
         $this->access_token = $access_token;
 
         $this->client = new GuzzleClient('https://' . $this->apiHost);
-        $this->client->setDefaultOption('query', ['access_token' => $access_token]);
+        $this->client->setDefaultOption('query', array('access_token' => $access_token));
 
         if (APPLICATION_ENV == 'dev') {
             $this->client->setDefaultOption('verify', false);
         }
     }
 
-    public function post($endpoint, $params = [])
+    public function post($endpoint, $params = array())
     {
         try {
             // This is a bit of a fudge to prevent having to amend all calls to /contacts
@@ -42,7 +42,7 @@ class Client
                 $endpoint = $this->getDataUrl();
             }
 
-            $response = $this->client->post($endpoint, [], $params)->send();
+            $response = $this->client->post($endpoint, array(), $params)->send();
 
             return $response->json();
         } catch(ClientErrorResponseException $e) {
@@ -53,7 +53,7 @@ class Client
         }
     }
 
-    public function get($endpoint, $params = [])
+    public function get($endpoint, $params = array())
     {
         try {
             // This is a bit of a fudge to prevent having to amend all calls to /data/user
@@ -61,19 +61,23 @@ class Client
                 $endpoint = $this->getDataUrl();
             }
 
-            $response = $this->client->get($endpoint, [], [
-                'query' => $params
-            ])->send();
+            $response = $this->client
+                ->get($endpoint, array(), array(
+                    'query' => $params
+                ))
+                ->send()
+            ;
 
             return $response->json();
         } catch(ClientErrorResponseException $e) {
-            $message = APPLICATION_ENV=='dev' ? 'Api responded with: ' . $e->getResponse()->getBody() :
+            $message = APPLICATION_ENV == 'dev' ? 'Api responded with: ' . $e->getResponse()->getBody() :
                 'An unexpected error occurred communicating with Contactzilla. If the problem persists, please contact support.';
+
             throw new ClientErrorResponseException($message);
         }
     }
 
-    public function call($endpoint, $params = [], $method) {
+    public function call($endpoint, $params = array(), $method) {
         return $this->$method($endpoint, $params);
     }
 
@@ -82,14 +86,14 @@ class Client
      */
     public function saveDataKeyValue($key, $value)
     {
-        $this->post($this->getDataUrl(), [
-            'body' => json_encode([
-                ['key' => $key, 'value' => $value]
-            ])
-        ]);
+        $this->post($this->getDataUrl(), array(
+            'body' => json_encode(array(
+                array('key' => $key, 'value' => $value)
+            ))
+        ));
     }
 
-    private function getDataUrl() {
+    protected function getDataUrl() {
         return '/address_books/' . $this->addressBook . '/app_install/' . $this->appInstallId . '/data/user';
     }
 }
