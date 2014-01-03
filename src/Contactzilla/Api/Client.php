@@ -6,6 +6,8 @@ use Guzzle;
 
 class Client
 {
+    const ERROR_MESSAGE = 'An unexpected error occurred communicating with Contactzilla. If the problem persists, please contact support.';
+
     public function __construct(
         $access_token,
         $appId = false,
@@ -39,8 +41,7 @@ class Client
         try {
             $response = $this->client->post($endpoint, array(), $params)->send();
         } catch(Guzzle\Http\Exception\ClientErrorResponseException $e) {
-            $message = $this->debug ? 'API responded with: ' . $e->getResponse()->getBody() :
-                'An unexpected error occurred communicating with Contactzilla. If the problem persists, please contact support.';
+            $message = $this->debug ? 'API responded with: ' . $e->getResponse()->getBody() : self::ERROR_MESSAGE;
 
             throw new Guzzle\Http\Exception\ClientErrorResponseException($message);
         }
@@ -60,8 +61,7 @@ class Client
 
             return $response->json();
         } catch(Guzzle\Http\Exception\ClientErrorResponseException $e) {
-            $message = $this->debug ? 'API responded with: ' . $e->getResponse()->getBody() :
-                'An unexpected error occurred communicating with Contactzilla. If the problem persists, please contact support.';
+            $message = $this->debug ? 'API responded with: ' . $e->getResponse()->getBody() : self::ERROR_MESSAGE;
 
             throw new Guzzle\Http\Exception\ClientErrorResponseException($message);
         }
