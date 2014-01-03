@@ -15,11 +15,11 @@ class Client
         $appInstallId = false,
         $apiHost = false
     ) {
-        $this->appId = $appId ? $appId : APP_ID;
-        $this->appSecret = $appSecret ? $appSecret : APP_SECRET;
-        $this->apiHost = $apiHost ? $apiHost : API_HOST;
-        $this->addressBook = $addressBook ? $addressBook : $_GET['appContextAddressBook'];
-        $this->appInstallId = $appInstallId ? $appInstallId : $_GET['appContextInstallId'];
+        $this->appId = $appId ?: APP_ID;
+        $this->appSecret = $appSecret ?: APP_SECRET;
+        $this->apiHost = $apiHost ?: API_HOST;
+        $this->addressBook = $addressBook ?: $_GET['appContextAddressBook'];
+        $this->appInstallId = $appInstallId ?: $_GET['appContextInstallId'];
         $this->access_token = $access_token;
 
         $this->client = new GuzzleClient('https://' . $this->apiHost);
