@@ -104,12 +104,12 @@ class Client
     {
         $request = $event['request'];
 
-        if ($request->getUrl() == '/contacts') {
-             $request->setUrl('/address_books/' . $this->addressBook . '/contacts');
+        if ($request->getPath() == '/contacts') {
+             $request->setPath('/address_books/' . $this->addressBook . '/contacts');
         }
 
-        if ($request->getUrl() == '/data/user') {
-            $request->setUrl($this->getUserDataUrl());
+        if ($request->getPath() == '/data/user') {
+            $request->setPath($this->getUserDataUrl());
         }
     }
 
