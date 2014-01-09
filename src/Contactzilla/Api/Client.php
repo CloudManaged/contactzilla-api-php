@@ -22,8 +22,8 @@ class Client
         $this->setAccessToken($access_token);
         $this->setAppId($appId ?: APP_ID);
         $this->setAppSecret($appSecret ?: APP_SECRET);
-        $this->setAddressBook($addressBook ?: isset($_GET['appContextAddressBook']) ? $_GET['appContextAddressBook'] : null);
-        $this->setAppInstallId($appInstallId ?: isset($_GET['appContextInstallId']) ? $_GET['appContextInstallId'] : null);
+        $this->setAddressBook($addressBook ?: (isset($_GET['appContextAddressBook']) ? $_GET['appContextAddressBook'] : null));
+        $this->setAppInstallId($appInstallId ?: (isset($_GET['appContextInstallId']) ? $_GET['appContextInstallId'] : null));
 
         $this->debug = $debug ?: APPLICATION_ENV == 'dev';
 
