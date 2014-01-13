@@ -10,22 +10,16 @@ class Client
 
     public function __construct(
         $access_token,
-        $appId = false,
-        $appSecret = false,
         $addressBook = false,
         $appInstallId = false,
         $apiHost = false,
         $debug = false
     ) {
-        $this->appId = $appId ?: APP_ID;
-        $this->appSecret = $appSecret ?: APP_SECRET;
-        $this->addressBook = $addressBook ?: $_GET['appContextAddressBook'];
-        $this->appInstallId = $appInstallId ?: $_GET['appContextInstallId'];
-        $this->apiHost = $apiHost ?: API_HOST;
-        $this->access_token = $access_token;
+        $this->client = new Guzzle\Http\Client('https://' . ($apiHost ?: API_HOST));
 
-        $this->client = new Guzzle\Http\Client('https://' . $this->apiHost);
-        $this->client->setDefaultOption('query', array('access_token' => $access_token));
+        $this->setAccessToken($access_token);
+        $this->setAddressBook($addressBook ?: (isset($_GET['appContextAddressBook']) ? $_GET['appContextAddressBook'] : null));
+        $this->setAppInstallId($appInstallId ?: (isset($_GET['appContextInstallId']) ? $_GET['appContextInstallId'] : null));
 
         $this->debug = $debug ?: APPLICATION_ENV == 'dev';
 
@@ -88,12 +82,49 @@ class Client
     }
 
     /**
-     * @alias saveUserDataKeyValue
      * @deprecated renamed
      */
     public function saveDataKeyValue($key, $value)
     {
         return $this->saveUserDataKeyValue($key, $value);
+    }
+
+    public function getAccessToken($access_token)
+    {
+        return $this->access_token;
+    }
+
+    public function setAccessToken($access_token)
+    {
+        $this->access_token = $access_token;
+
+        $this->client->setDefaultOption('query', array('access_token' => $access_token));
+
+        return $this;
+    }
+
+    public function getAddressBook($addressBook)
+    {
+        return $this->addressBook;
+    }
+
+    public function setAddressBook($addressBook)
+    {
+        $this->addressBook = $addressBook;
+
+        return $this;
+    }
+
+    public function getAppInstallId($appInstallId)
+    {
+        return $this->appInstallId;
+    }
+
+    public function setAppInstallId($appInstallId)
+    {
+        $this->appInstallId = $appInstallId;
+
+        return $this;
     }
 
     /**
