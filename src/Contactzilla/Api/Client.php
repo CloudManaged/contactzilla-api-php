@@ -21,7 +21,7 @@ class Client
         $this->setAddressBook($addressBook ?: (isset($_GET['appContextAddressBook']) ? $_GET['appContextAddressBook'] : null));
         $this->setAppInstallId($appInstallId ?: (isset($_GET['appContextInstallId']) ? $_GET['appContextInstallId'] : null));
 
-        $this->debug = $debug ?: APPLICATION_ENV == 'dev';
+        $this->debug = $debug;
 
         if ($this->debug) {
             $this->client->setDefaultOption('verify', false);
