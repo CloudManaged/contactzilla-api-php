@@ -20,12 +20,7 @@ class Client
         $this->setAccessToken($access_token);
         $this->setAddressBook($addressBook ?: (isset($_GET['appContextAddressBook']) ? $_GET['appContextAddressBook'] : null));
         $this->setAppInstallId($appInstallId ?: (isset($_GET['appContextInstallId']) ? $_GET['appContextInstallId'] : null));
-
-        $this->debug = $debug;
-
-        if ($this->debug) {
-            $this->client->setDefaultOption('verify', false);
-        }
+        $this->setDebug($debug);
 
         $this->client->getEventDispatcher()->addListener('request.before_send', array($this, 'beforeRequestFixLegacyEndpoints'));
     }
@@ -123,6 +118,22 @@ class Client
     public function setAppInstallId($appInstallId)
     {
         $this->appInstallId = $appInstallId;
+
+        return $this;
+    }
+
+    public function getDebug()
+    {
+        return $this->debug;
+    }
+
+    public function setDebug($debug)
+    {
+        $this->debug = $debug;
+
+        if ($this->debug) {
+            $this->client->setDefaultOption('verify', false);
+        }
 
         return $this;
     }
