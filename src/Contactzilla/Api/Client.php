@@ -9,7 +9,7 @@ class Client
     const ERROR_MESSAGE = 'An unexpected error occurred communicating with Contactzilla. If the problem persists, please contact support.';
 
     public function __construct(
-        $access_token,
+        $accessToken,
         $addressBook = false,
         $appInstallId = false,
         $apiHost = false,
@@ -17,7 +17,7 @@ class Client
     ) {
         $this->client = new Guzzle\Http\Client('https://' . ($apiHost ?: API_HOST));
 
-        $this->setAccessToken($access_token);
+        $this->setAccessToken($accessToken);
         $this->setAddressBook($addressBook ?: (isset($_GET['appContextAddressBook']) ? $_GET['appContextAddressBook'] : null));
         $this->setAppInstallId($appInstallId ?: (isset($_GET['appContextInstallId']) ? $_GET['appContextInstallId'] : null));
         $this->setDebug($debug);
@@ -84,21 +84,21 @@ class Client
         return $this->saveUserDataKeyValue($key, $value);
     }
 
-    public function getAccessToken($access_token)
+    public function getAccessToken()
     {
-        return $this->access_token;
+        return $this->accessToken;
     }
 
-    public function setAccessToken($access_token)
+    public function setAccessToken($accessToken)
     {
-        $this->access_token = $access_token;
+        $this->accessToken = $accessToken;
 
-        $this->client->setDefaultOption('query', array('access_token' => $access_token));
+        $this->client->setDefaultOption('query', array('access_token' => $accessToken));
 
         return $this;
     }
 
-    public function getAddressBook($addressBook)
+    public function getAddressBook()
     {
         return $this->addressBook;
     }
@@ -110,7 +110,7 @@ class Client
         return $this;
     }
 
-    public function getAppInstallId($appInstallId)
+    public function getAppInstallId()
     {
         return $this->appInstallId;
     }
