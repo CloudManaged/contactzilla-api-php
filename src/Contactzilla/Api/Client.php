@@ -58,7 +58,7 @@ class Client
         return $this->$method($endpoint, $params);
     }
 
-    public function contacts($params = [])
+    public function contacts($params = array())
     {
         return $this->get('/contacts', $params);
     }
