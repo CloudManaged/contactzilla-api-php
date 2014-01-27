@@ -145,6 +145,22 @@ class Client
         return $this;
     }
 
+    public function getSabreDAVClient(array $args) {
+        $client = new \Sabre\DAVClient\Client($args);
+
+        $client->on('beforeRequest', function ($request) {
+            $request->addHeaders([
+                'Authorization' => 'Bearer ' . $this->getAccessToken()
+            ]);
+        });
+
+        if ($this->getDebug()) {
+            $client->setVerifyPeer(false);
+        }
+
+        return $client;
+    }
+
     /**
      * Allows for legacy requests (mostly in importers)
      * @todo correct these in importers and deprecate this functionality
