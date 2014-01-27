@@ -8,6 +8,8 @@ class Client
 {
     const ERROR_MESSAGE = 'An unexpected error occurred communicating with Contactzilla. If the problem persists, please contact support.';
 
+    protected $debug;
+
     public function __construct(
         $accessToken,
         $addressBook = false,
@@ -30,7 +32,7 @@ class Client
         try {
             $response = $this->client->get($endpoint, array(), array('query' => $params))->send();
         } catch(Guzzle\Http\Exception\ClientErrorResponseException $e) {
-            $message = $this->debug ? 'API responded with: ' . $e->getResponse()->getBody() : self::ERROR_MESSAGE;
+            $message = $this->getDebug() ? 'API responded with: ' . $e->getResponse()->getBody() : self::ERROR_MESSAGE;
 
             throw new Guzzle\Http\Exception\ClientErrorResponseException($message);
         }
@@ -43,7 +45,7 @@ class Client
         try {
             $response = $this->client->post($endpoint, array(), $params)->send();
         } catch(Guzzle\Http\Exception\ClientErrorResponseException $e) {
-            $message = $this->debug ? 'API responded with: ' . $e->getResponse()->getBody() : self::ERROR_MESSAGE;
+            $message = $this->getDebug() ? 'API responded with: ' . $e->getResponse()->getBody() : self::ERROR_MESSAGE;
 
             throw new Guzzle\Http\Exception\ClientErrorResponseException($message);
         }
