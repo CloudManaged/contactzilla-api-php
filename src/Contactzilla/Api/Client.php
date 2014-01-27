@@ -56,6 +56,11 @@ class Client
         return $this->$method($endpoint, $params);
     }
 
+    public function contacts($params = [])
+    {
+        return $this->get('/contacts', $params);
+    }
+
     /**
      * Gets user data for this application
      */
