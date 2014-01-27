@@ -58,9 +58,14 @@ class Client
         return $this->$method($endpoint, $params);
     }
 
-    public function contacts($params = array())
+    public function getContacts($params = array())
     {
-        return $this->get('/contacts', $params);
+        return $this->get('/address_books/' . $this->addressBook . '/contacts', $params);
+    }
+
+    public function getDeletedContacts($params = array())
+    {
+        return $this->get('/address_books/' . $this->addressBook . '/contacts/deleted', $params);
     }
 
     /**
