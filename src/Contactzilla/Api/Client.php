@@ -66,9 +66,15 @@ class Client
     /**
      * Gets user data for this application
      */
-    public function getUserData()
+    public function getUserData($key = null)
     {
-        return $this->get($this->getUserDataUrl());
+        $userData = $this->get($this->getUserDataUrl());
+
+        if ($key !== null) {
+            $userData = isset($userData[$key]) ? $userData[$key] : null;
+        }
+
+        return $userData;
     }
 
     /**
