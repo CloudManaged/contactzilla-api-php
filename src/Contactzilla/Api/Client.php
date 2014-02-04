@@ -63,11 +63,6 @@ class Client
         return $this->get('/address_books/' . $this->addressBook . '/contacts', $params);
     }
 
-    public function getDeletedContacts($params = array())
-    {
-        return $this->get('/address_books/' . $this->addressBook . '/contacts/deleted', $params);
-    }
-
     /**
      * Gets user data for this application
      */
