@@ -177,7 +177,8 @@ class Client
 
         $client->on('beforeRequest', function ($request) {
             $request->addHeaders([
-                'Authorization' => 'Bearer ' . $this->getAccessToken()
+                'Authorization' => 'Bearer ' . $this->getAccessToken(),
+                'Expect' => null
             ]);
         });
 
