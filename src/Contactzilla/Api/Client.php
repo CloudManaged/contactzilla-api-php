@@ -53,6 +53,19 @@ class Client
         return $response->json();
     }
 
+    public function delete($endpoint, $params = array())
+    {
+        try {
+            $response = $this->client->delete($endpoint, array(), array('query' => $params))->send();
+        } catch(Guzzle\Http\Exception\ClientErrorResponseException $e) {
+            $message = $this->getDebug() ? 'API responded with: ' . $e->getResponse()->getBody() : self::ERROR_MESSAGE;
+
+            throw new Guzzle\Http\Exception\ClientErrorResponseException($message);
+        }
+
+        return $response->json();
+    }
+
     public function call($endpoint, $params = array(), $method)
     {
         return $this->$method($endpoint, $params);
@@ -87,6 +100,14 @@ class Client
                 array('key' => $key, 'value' => $value)
             ))
         ));
+    }
+
+    /**
+     * Clears all user data.
+     */
+    public function clearAllUserData()
+    {
+        $this->delete($this->getUserDataUrl());
     }
 
     /**
