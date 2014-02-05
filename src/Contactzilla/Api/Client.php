@@ -176,10 +176,10 @@ class Client
         $client = new \Sabre\DAVClient\Client($args);
 
         $client->on('beforeRequest', function ($request) {
-            $request->addHeaders([
+            $request->addHeaders(array(
                 'Authorization' => 'Bearer ' . $this->getAccessToken(),
                 'Expect' => null
-            ]);
+            ));
         });
 
         if ($this->getDebug()) {
