@@ -93,7 +93,7 @@ class Client
     /**
      * Saves user data against the application
      */
-    public function saveUserDataKeyValue($key, $value)
+    public function setUserData($key, $value)
     {
         return $this->post($this->getUserDataUrl(), array(
             'body' => json_encode(array(
@@ -103,19 +103,33 @@ class Client
     }
 
     /**
-     * Clears all user data.
+     * @deprecated renamed
      */
-    public function clearAllUserData()
+    public function saveDataKeyValue($key, $value)
     {
-        $this->delete($this->getUserDataUrl());
+        return $this->setUserData($key, $value);
     }
 
     /**
      * @deprecated renamed
      */
-    public function saveDataKeyValue($key, $value)
+    public function saveUserDataKeyValue($key, $value)
     {
-        return $this->saveUserDataKeyValue($key, $value);
+        return $this->setUserData($key, $value);
+    }
+
+    /**
+     * Delete user data for this application, all of it if no key is passed
+     */
+    public function deleteUserData($key = null)
+    {
+        $uri = $this->getUserDataUrl();
+
+        if ($key !== null) {
+            $uri .= '/key/' . $key;
+        }
+
+        $this->delete($uri);
     }
 
     public function getAccessToken()
