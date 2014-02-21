@@ -1,5 +1,5 @@
 {
-    "name": "cloudmanaged/contactzilla-api-php",
+    "name": "contactzilla/api",
     "description": "API client library for the Contactzilla seamless contact management platform.",
     "keywords": [ "contacts", "data", "api", "client" ],
     "license": "MIT",
