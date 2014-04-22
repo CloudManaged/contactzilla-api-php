@@ -15,7 +15,8 @@ class Client
         $addressBook = false,
         $appInstallId = false,
         $apiHost = false,
-        $debug = false
+        $debug = false,
+        $contentType = false
     ) {
         $this->client = new Guzzle\Http\Client('https://' . ($apiHost ?: API_HOST));
 
@@ -23,8 +24,10 @@ class Client
         $this->setAddressBook($addressBook ?: (isset($_GET['appContextAddressBook']) ? $_GET['appContextAddressBook'] : null));
         $this->setAppInstallId($appInstallId ?: (isset($_GET['appContextInstallId']) ? $_GET['appContextInstallId'] : null));
         $this->setDebug($debug);
+        $this->setContentType($contentType);
 
         $this->client->getEventDispatcher()->addListener('request.before_send', array($this, 'beforeRequestFixLegacyEndpoints'));
+        $this->client->getEventDispatcher()->addListener('request.before_send', array($this, 'beforeSetContentType'));
     }
 
     public function get($endpoint, $params = array())
@@ -186,6 +189,16 @@ class Client
         return $this;
     }
 
+    public function setContentType($contentType)
+    {
+        $this->contentType = $contentType;
+    }
+
+    public function getContentType($contentType)
+    {
+        return $this->contentType;
+    }
+
     public function getSabreDAVClient(array $args) {
         $client = new \Sabre\DAVClient\Client($args);
 
@@ -217,6 +230,14 @@ class Client
 
         if ($request->getPath() == '/data/user') {
             $request->setPath($this->getUserDataUrl());
+        }
+    }
+
+    public function beforeSetContentType(Guzzle\Common\Event $event)
+    {
+        if ($this->contentType) {
+            $request = $event['request'];
+            $request->setHeader('Content-Type', $this->contentType);
         }
     }
 
