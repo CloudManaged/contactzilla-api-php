@@ -12,12 +12,22 @@ class Client
 
     public function __construct(
         $accessToken,
-        $addressBook = false,
+        $options = false,
         $appInstallId = false,
         $apiHost = false,
         $debug = false,
         $contentType = false
     ) {
+        if (func_num_args() == 2 && is_array($options)) {
+            $addressBook = isset($options['addressBook']) ? $options['addressBook'] : false;
+            $appInstallId = isset($options['appInstallId']) ? $options['appInstallId'] : false;
+            $apiHost = isset($options['apiHost']) ? $options['apiHost'] : false;
+            $contentType = isset($options['contentType']) ? $options['contentType'] : false;
+            $debug = isset($options['debug']) ? $options['debug'] : false;
+        } else {
+            $addressBook = $options;
+        }
+
         $this->client = new Guzzle\Http\Client('https://' . ($apiHost ?: API_HOST));
 
         $this->setAccessToken($accessToken);
