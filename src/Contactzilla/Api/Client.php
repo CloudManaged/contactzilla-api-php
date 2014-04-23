@@ -9,32 +9,44 @@ class Client
     const ERROR_MESSAGE = 'An unexpected error occurred communicating with Contactzilla. If the problem persists, please contact support.';
 
     protected $debug;
+    protected $options;
 
     public function __construct(
         $accessToken,
-        $options = false,
-        $appInstallId = false,
-        $apiHost = false,
-        $debug = false,
-        $contentType = false
+        $options = null,
+        $appInstallId = null,
+        $apiHost = null,
+        $debug = null,
+        $contentType = null
     ) {
+        $this->options = array(
+            'accessToken' => null,
+            'addressBook' => null,
+            'appInstallId' => null,
+            'apiHost' => null,
+            'contentType' => false,
+            'debug' => false
+        );
+
         if (func_num_args() == 2 && is_array($options)) {
-            $addressBook = isset($options['addressBook']) ? $options['addressBook'] : false;
-            $appInstallId = isset($options['appInstallId']) ? $options['appInstallId'] : false;
-            $apiHost = isset($options['apiHost']) ? $options['apiHost'] : false;
-            $contentType = isset($options['contentType']) ? $options['contentType'] : false;
-            $debug = isset($options['debug']) ? $options['debug'] : false;
+            $this->options = array_merge($this->options, $options);
         } else {
-            $addressBook = $options;
+            $this->options['addressBook'] = $options ?: (isset($_GET['appContextAddressBook']) ? $_GET['appContextAddressBook'] : null);
+            $this->options['appInstallId'] = $appInstallId ?: (isset($_GET['appContextInstallId']) ? $_GET['appContextInstallId'] : null);
+            $this->options['apiHost'] = $apiHost;
+            $this->options['contentType'] = $contentType;
+            $this->options['debug'] = $debug;
         }
+        
+        $this->options['accessToken'] = $accessToken;
 
-        $this->client = new Guzzle\Http\Client('https://' . ($apiHost ?: API_HOST));
+        $this->client = new Guzzle\Http\Client('https://' . ($this->options['apiHost'] ?: API_HOST));
 
-        $this->setAccessToken($accessToken);
-        $this->setAddressBook($addressBook ?: (isset($_GET['appContextAddressBook']) ? $_GET['appContextAddressBook'] : null));
-        $this->setAppInstallId($appInstallId ?: (isset($_GET['appContextInstallId']) ? $_GET['appContextInstallId'] : null));
-        $this->setDebug($debug);
-        $this->setContentType($contentType);
+        $this->setAccessToken($this->options['accessToken']);
+        $this->setAddressBook($this->options['addressBook']);
+        $this->setAppInstallId($this->options['appInstallId']);
+        $this->setContentType($this->options['contentType']);
+        $this->setDebug($this->options['debug']);
 
         $this->client->getEventDispatcher()->addListener('request.before_send', array($this, 'beforeRequestFixLegacyEndpoints'));
         $this->client->getEventDispatcher()->addListener('request.before_send', array($this, 'beforeSetContentType'));
@@ -204,7 +216,7 @@ class Client
         $this->contentType = $contentType;
     }
 
-    public function getContentType($contentType)
+    public function getContentType()
     {
         return $this->contentType;
     }
@@ -235,7 +247,7 @@ class Client
         $request = $event['request'];
 
         if ($request->getPath() == '/contacts') {
-             $request->setPath('/address_books/' . $this->addressBook . '/contacts');
+             $request->setPath('/address_books/' . $this->getAddressBook() . '/contacts');
         }
 
         if ($request->getPath() == '/data/user') {
@@ -245,13 +257,13 @@ class Client
 
     public function beforeSetContentType(Guzzle\Common\Event $event)
     {
-        if ($this->contentType) {
+        if ($this->getContentType()) {
             $request = $event['request'];
-            $request->setHeader('Content-Type', $this->contentType);
+            $request->setHeader('Content-Type', $this->getContentType());
         }
     }
 
     protected function getUserDataUrl() {
-        return '/address_books/' . $this->addressBook . '/app_install/' . $this->appInstallId . '/data/user';
+        return '/address_books/' . $this->getAddressBook() . '/app_install/' . $this->getAppInstallId() . '/data/user';
     }
 }
