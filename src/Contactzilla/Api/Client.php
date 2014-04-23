@@ -9,44 +9,59 @@ class Client
     const ERROR_MESSAGE = 'An unexpected error occurred communicating with Contactzilla. If the problem persists, please contact support.';
 
     protected $debug;
-    protected $options;
+    
+    protected $defaults = array(
+        'accessToken'  => null,
+        'addressBook'  => null,
+        'appInstallId' => null,
+        'apiHost'      => null,
+        'contentType'  => false,
+        'debug'        => false
+    );
 
     public function __construct(
-        $accessToken,
-        $options = null,
+        $accessTokenOrOptions,
+        $addressBook = null,
         $appInstallId = null,
         $apiHost = null,
         $debug = null,
         $contentType = null
     ) {
-        $this->options = array(
-            'accessToken' => null,
-            'addressBook' => null,
-            'appInstallId' => null,
-            'apiHost' => null,
-            'contentType' => false,
-            'debug' => false
-        );
-
-        if (func_num_args() == 2 && is_array($options)) {
-            $this->options = array_merge($this->options, $options);
+        // BC: allow an options array or multiple arguments to maintain BC
+        //     any new implementations should use the options array, we'll
+        //     deprecate the latter at some point
+        if (is_array($accessTokenOrOptions)) {
+            if (func_num_args() == 1) {
+                $options = array_merge($this->defaults, $accessTokenOrOptions);
+            } else {
+                throw new \Exception('Invalid arguments: either pass in an options array or multiple arguments, not both.');
+            }
         } else {
-            $this->options['addressBook'] = $options ?: (isset($_GET['appContextAddressBook']) ? $_GET['appContextAddressBook'] : null);
-            $this->options['appInstallId'] = $appInstallId ?: (isset($_GET['appContextInstallId']) ? $_GET['appContextInstallId'] : null);
-            $this->options['apiHost'] = $apiHost;
-            $this->options['contentType'] = $contentType;
-            $this->options['debug'] = $debug;
+            $options = array_merge($this->defaults, array(
+                'accessToken'  => $accessTokenOrOptions,
+                'addressBook'  => $addressBook,
+                'apiHost'      => $apiHost,
+                'appInstallId' => $appInstallId,
+                'contentType'  => $contentType,
+                'debug'        => $debug
+            ));
         }
-        
-        $this->options['accessToken'] = $accessToken;
 
-        $this->client = new Guzzle\Http\Client('https://' . ($this->options['apiHost'] ?: API_HOST));
+        if (!$options['addressBook'] && isset($_GET['appContextAddressBook'])) {
+            $options['addressBook'] = $_GET['appContextAddressBook'];
+        }
 
-        $this->setAccessToken($this->options['accessToken']);
-        $this->setAddressBook($this->options['addressBook']);
-        $this->setAppInstallId($this->options['appInstallId']);
-        $this->setContentType($this->options['contentType']);
-        $this->setDebug($this->options['debug']);
+        if (!$options['appInstallId'] && isset($_GET['appContextInstallId'])) {
+            $options['appInstallId'] = $_GET['appContextInstallId'];
+        }
+
+        $this->client = new Guzzle\Http\Client('https://' . ($options['apiHost'] ?: API_HOST));
+
+        $this->setAccessToken($options['accessToken']);
+        $this->setAddressBook($options['addressBook']);
+        $this->setAppInstallId($options['appInstallId']);
+        $this->setContentType($options['contentType']);
+        $this->setDebug($options['debug']);
 
         $this->client->getEventDispatcher()->addListener('request.before_send', array($this, 'beforeRequestFixLegacyEndpoints'));
         $this->client->getEventDispatcher()->addListener('request.before_send', array($this, 'beforeSetContentType'));
