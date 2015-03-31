@@ -58,18 +58,22 @@ class Client
             $options['appInstallId'] = $_GET['appContextInstallId'];
         }
 
-        $this->oauth2Client = new Guzzle\Http\Client(['base_url' => 'https://' . ($options['apiHost'] ?: API_HOST)]);
-        $token = new PasswordCredentials($this->oauth2Client, $options);
-        $refreshToken = new RefreshToken($this->oauth2Client, $options);
-        $this->oauth2 = new Oauth2Subscriber($token, $refreshToken);
+        if (array_key_exists('client_id', $options)) {
+            $this->oauth2Client = new Guzzle\Http\Client(['base_url' => 'https://' . ($options['apiHost'] ?: API_HOST)]);
 
-        //$this->client = new Guzzle\Http\Client('https://' . ($options['apiHost'] ?: API_HOST));
-        $this->client = new Client([
-            'defaults' => [
-                'auth' => 'oauth2',
-                'subscribers' => [$this->oauth2],
-            ],
-        ]);
+            $token = new PasswordCredentials($this->oauth2Client, $options);
+            $refreshToken = new RefreshToken($this->oauth2Client, $options);
+            $this->oauth2 = new Oauth2Subscriber($token, $refreshToken);
+
+            $this->client = new Client([
+                'defaults' => [
+                    'auth' => 'oauth2',
+                    'subscribers' => [$this->oauth2],
+                ],
+            ]);
+        } else {
+            $this->client = new Guzzle\Http\Client('https://' . ($options['apiHost'] ?: API_HOST));
+        }
 
         $this->setAccessToken($options['accessToken']);
         $this->setAddressBook($options['addressBook']);
