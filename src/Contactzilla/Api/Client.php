@@ -3,6 +3,9 @@
 namespace Contactzilla\Api;
 
 use Guzzle;
+use CommerceGuys\Guzzle\Plugin\Oauth2\GrantType\RefreshToken;
+use CommerceGuys\Guzzle\Plugin\Oauth2\GrantType\PasswordCredentials;
+use CommerceGuys\Guzzle\Plugin\Oauth2\Oauth2Subscriber;
 
 class Client
 {
@@ -55,7 +58,18 @@ class Client
             $options['appInstallId'] = $_GET['appContextInstallId'];
         }
 
-        $this->client = new Guzzle\Http\Client('https://' . ($options['apiHost'] ?: API_HOST));
+        $this->oauth2Client = new Guzzle\Http\Client(['base_url' => 'https://' . ($options['apiHost'] ?: API_HOST)]);
+        $token = new PasswordCredentials($this->oauth2Client, $options);
+        $refreshToken = new RefreshToken($this->oauth2Client, $options);
+        $this->oauth2 = new Oauth2Subscriber($token, $refreshToken);
+
+        //$this->client = new Guzzle\Http\Client('https://' . ($options['apiHost'] ?: API_HOST));
+        $this->client = new Client([
+            'defaults' => [
+                'auth' => 'oauth2',
+                'subscribers' => [$this->oauth2],
+            ],
+        ]);
 
         $this->setAccessToken($options['accessToken']);
         $this->setAddressBook($options['addressBook']);
@@ -71,7 +85,7 @@ class Client
     {
         try {
             $response = $this->client->get($endpoint, array(), array('query' => $params))->send();
-        } catch(Guzzle\Http\Exception\ClientErrorResponseException $e) {
+        } catch (Guzzle\Http\Exception\ClientErrorResponseException $e) {
             $message = $this->getDebug() ? 'API responded with: ' . $e->getResponse()->getBody() : self::ERROR_MESSAGE;
 
             throw new Guzzle\Http\Exception\ClientErrorResponseException($message);
@@ -84,7 +98,7 @@ class Client
     {
         try {
             $response = $this->client->post($endpoint, array(), $params)->send();
-        } catch(Guzzle\Http\Exception\ClientErrorResponseException $e) {
+        } catch (Guzzle\Http\Exception\ClientErrorResponseException $e) {
             $message = $this->getDebug() ? 'API responded with: ' . $e->getResponse()->getBody() : self::ERROR_MESSAGE;
 
             throw new Guzzle\Http\Exception\ClientErrorResponseException($message);
@@ -97,7 +111,7 @@ class Client
     {
         try {
             $response = $this->client->delete($endpoint, array(), array('query' => $params))->send();
-        } catch(Guzzle\Http\Exception\ClientErrorResponseException $e) {
+        } catch (Guzzle\Http\Exception\ClientErrorResponseException $e) {
             $message = $this->getDebug() ? 'API responded with: ' . $e->getResponse()->getBody() : self::ERROR_MESSAGE;
 
             throw new Guzzle\Http\Exception\ClientErrorResponseException($message);
@@ -172,9 +186,14 @@ class Client
         $this->delete($uri);
     }
 
+    public function getRefreshToken()
+    {
+        return $this->oauth2->getRefreshToken();
+    }
+
     public function getAccessToken()
     {
-        return $this->accessToken;
+        return $this->oauth2->getAccessToken();
     }
 
     public function setAccessToken($accessToken)
@@ -236,7 +255,8 @@ class Client
         return $this->contentType;
     }
 
-    public function getSabreDAVClient(array $args) {
+    public function getSabreDAVClient(array $args)
+    {
         $client = new \Sabre\DAVClient\Client($args);
 
         $client->on('beforeRequest', function ($request) {
@@ -278,7 +298,8 @@ class Client
         }
     }
 
-    protected function getUserDataUrl() {
+    protected function getUserDataUrl()
+    {
         return '/address_books/' . $this->getAddressBook() . '/app_install/' . $this->getAppInstallId() . '/data/user';
     }
 }
