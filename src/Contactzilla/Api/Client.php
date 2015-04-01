@@ -9,6 +9,8 @@ use CommerceGuys\Guzzle\Plugin\Oauth2\GrantType\PasswordCredentials;
 
 class Client
 {
+    const API_HOST = 'api.contactzilla.com';
+    const AUTH_HOST = 'hq.contactzilla.com';
     const ERROR_MESSAGE = 'An unexpected error occurred communicating with Contactzilla. If the problem persists, please contact support.';
 
     protected $debug;
@@ -58,10 +60,10 @@ class Client
             $options['appInstallId'] = $_GET['appContextInstallId'];
         }
 
-        $this->client = new Guzzle\Http\Client('https://' . ($options['apiHost'] ?: API_HOST));
+        $this->client = new Guzzle\Http\Client('https://' . ($options['apiHost'] ?: self::API_HOST));
 
         if (array_key_exists('client_id', $options)) {
-            $this->oauth2Client = new Guzzle\Http\Client(['base_url' => 'https://' . ($options['apiHost'] ?: API_HOST) . '/oauth2/grant']);
+            $this->oauth2Client = new Guzzle\Http\Client(['base_url' => 'https://' . ($options['authHost'] ?: self::AUTH_HOST) . '/oauth2/grant']);
 
             $grantType = new PasswordCredentials($this->oauth2Client, $options);
             $refreshToken = new RefreshToken($this->oauth2Client, $options);
