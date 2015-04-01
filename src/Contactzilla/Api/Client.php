@@ -3,9 +3,9 @@
 namespace Contactzilla\Api;
 
 use Guzzle;
+use CommerceGuys\Guzzle\Plugin\Oauth2\Oauth2Plugin;
 use CommerceGuys\Guzzle\Plugin\Oauth2\GrantType\RefreshToken;
 use CommerceGuys\Guzzle\Plugin\Oauth2\GrantType\PasswordCredentials;
-use CommerceGuys\Guzzle\Plugin\Oauth2\Oauth2Subscriber;
 
 class Client
 {
@@ -58,21 +58,23 @@ class Client
             $options['appInstallId'] = $_GET['appContextInstallId'];
         }
 
+        $this->client = new Guzzle\Http\Client('https://' . ($options['apiHost'] ?: API_HOST));
+
         if (array_key_exists('client_id', $options)) {
-            $this->oauth2Client = new Guzzle\Http\Client(['base_url' => 'https://' . ($options['apiHost'] ?: API_HOST)]);
+            $this->oauth2Client = new Guzzle\Http\Client(['base_url' => 'https://' . ($options['apiHost'] ?: API_HOST) . '/oauth2/grant']);
 
-            $token = new PasswordCredentials($this->oauth2Client, $options);
+            $grantType = new PasswordCredentials($this->oauth2Client, $options);
             $refreshToken = new RefreshToken($this->oauth2Client, $options);
-            $this->oauth2 = new Oauth2Subscriber($token, $refreshToken);
+            $this->oauth2 = new Oauth2Plugin($grantType, $refreshToken);
 
-            $this->client = new Client([
-                'defaults' => [
-                    'auth' => 'oauth2',
-                    'subscribers' => [$this->oauth2],
-                ],
-            ]);
-        } else {
-            $this->client = new Guzzle\Http\Client('https://' . ($options['apiHost'] ?: API_HOST));
+            $this->client->addSubscriber($this->oauth2);
+
+            //$this->client = new Client([
+            //    'defaults' => [
+            //        'auth' => 'oauth2',
+            //        'subscribers' => [$this->oauth2],
+            //    ],
+            //]);
         }
 
         $this->setAccessToken($options['accessToken']);
