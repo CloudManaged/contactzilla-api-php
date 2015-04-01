@@ -14,7 +14,7 @@ class Client
     const ERROR_MESSAGE = 'An unexpected error occurred communicating with Contactzilla. If the problem persists, please contact support.';
 
     protected $debug;
-    
+
     protected $defaults = array(
         'accessToken'  => null,
         'addressBook'  => null,
@@ -63,7 +63,7 @@ class Client
         $this->client = new Guzzle\Http\Client('https://' . ($options['apiHost'] ?: self::API_HOST));
 
         if (array_key_exists('client_id', $options)) {
-            $this->oauth2Client = new Guzzle\Http\Client(['base_url' => 'https://' . ($options['authHost'] ?: self::AUTH_HOST) . '/oauth2/grant']);
+            $this->oauth2Client = new Guzzle\Http\Client('https://' . ($options['authHost'] ?: self::AUTH_HOST) . '/oauth2/grant');
 
             $grantType = new PasswordCredentials($this->oauth2Client, $options);
             $refreshToken = new RefreshToken($this->oauth2Client, $options);
@@ -290,7 +290,7 @@ class Client
         $request = $event['request'];
 
         if ($request->getPath() == '/contacts') {
-             $request->setPath('/address_books/' . $this->getAddressBook() . '/contacts');
+            $request->setPath('/address_books/' . $this->getAddressBook() . '/contacts');
         }
 
         if ($request->getPath() == '/data/user') {
