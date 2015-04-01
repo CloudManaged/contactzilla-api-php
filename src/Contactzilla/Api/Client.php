@@ -72,6 +72,7 @@ class Client
             $this->client->addSubscriber($this->oauth2);
         }
 
+        $this->setRefreshToken($options['refreshToken']);
         $this->setAccessToken($options['accessToken']);
         $this->setAddressBook($options['addressBook']);
         $this->setAppInstallId($options['appInstallId']);
@@ -192,9 +193,18 @@ class Client
         return $this->oauth2->getRefreshToken();
     }
 
+    public function setRefreshToken($refreshToken)
+    {
+        $this->refreshToken = $refreshToken;
+
+        $this->oauth2->setRefreshToken($refreshToken);
+
+        return $this;
+    }
+
     public function getAccessToken()
     {
-        return $this->oauth2->getAccessToken();
+        return $this->accessToken;
     }
 
     public function setAccessToken($accessToken)
