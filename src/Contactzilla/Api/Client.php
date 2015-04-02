@@ -72,7 +72,6 @@ class Client
             $this->client->addSubscriber($this->oauth2);
         }
 
-        $this->setRefreshToken($options['refreshToken']);
         $this->setAccessToken($options['accessToken']);
         $this->setAddressBook($options['addressBook']);
         $this->setAppInstallId($options['appInstallId']);
